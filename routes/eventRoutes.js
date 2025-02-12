@@ -8,10 +8,15 @@ const router = express.Router();
 router.post("/", authMiddleware, async (req, res) => {
   try {
     const io = req.app.get("io");
-    const { title, description, date } = req.body;
+    const { title, description, date, category } = req.body;
+
+    // ✅ Ensure category is provided
+    if (!category) {
+      return res.status(400).json({ message: "Category is required" });
+    }
 
     // Create new event
-    const newEvent = new Event({ title, description, date, createdBy: req.user.userId });
+    const newEvent = new Event({ title, description, date, category, createdBy: req.user.userId });
     await newEvent.save();
 
     // Populate createdBy before emitting event
@@ -58,6 +63,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     event.title = req.body.title || event.title;
     event.description = req.body.description || event.description;
     event.date = req.body.date || event.date;
+    event.category = req.body.category || event.category; // ✅ Ensure category is updated
     await event.save();
 
     // Fetch updated event and populate createdBy field
