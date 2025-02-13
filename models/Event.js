@@ -6,6 +6,7 @@ const EventSchema = new mongoose.Schema(
     description: { type: String, required: true },
     date: { type: Date, required: true },
     category: { type: String, required: true, enum: ["Conference", "Workshop", "Meetup"] }, // ✅ New category field
+    imageUrl: { type: String, default: "" }, // 🔹 Store Cloudinary image URL
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Associate event with a user
   },
   { timestamps: true }
