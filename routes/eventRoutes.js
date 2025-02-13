@@ -151,4 +151,28 @@ router.post("/:id/join", authMiddleware, async (req, res) => {
   }
 });
 
+// ✅ LEAVE EVENT (Un-RSVP)
+router.post("/:id/leave", authMiddleware, async (req, res) => {
+  try {
+    const io = req.app.get("io");
+    const event = await Event.findById(req.params.id);
+
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // Remove user from attendees list
+    event.attendees = event.attendees.filter((attendee) => attendee.toString() !== req.user.userId);
+    await event.save();
+
+    const updatedEvent = await Event.findById(event._id)
+      .populate("createdBy", "name email")
+      .populate("attendees", "name email");
+
+    io.emit("attendeeUpdated", updatedEvent);
+    res.status(200).json(updatedEvent);
+  } catch (error) {
+    console.error("Error leaving event:", error);
+    res.status(500).json({ message: "Error leaving event" });
+  }
+});
+
 module.exports = router;
